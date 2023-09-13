@@ -23,7 +23,7 @@ Tokyo,Japan
 
 === playerselected(choices) ===
 ~city_name = choices 
-You've said {choices} 
+You've said {choices} !
 -> END
 
 === alreadychosen ===

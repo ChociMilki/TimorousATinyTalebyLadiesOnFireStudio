@@ -21,11 +21,18 @@ public class DialogueManager : MonoBehaviour
     {
         if (instance != null && instance != this) { Destroy(this); return; }
         instance = this;
+
+        // 
+        dialogueVariables = new DialogueVariables(loadGlobalsJSON); 
     }
     public static DialogueManager GetInstance()
     {
         return instance;
     }
+
+    [Header("Load Globals JSON")]
+    [SerializeField] private TextAsset loadGlobalsJSON; 
+
 
     [Header("Dialogue UI Configurationa")]
     [SerializeField] private GameObject dialoguePanel; 
@@ -35,7 +42,9 @@ public class DialogueManager : MonoBehaviour
     [SerializeField] private GameObject[] choices;
     private TextMeshProUGUI[] choicesText; 
     private Story currentStory;
-    private float waitFor = 0.2f; 
+    private float waitFor = 0.2f;
+
+    private DialogueVariables dialogueVariables; 
     // readonly
     public bool dialogueIsPlaying { get; private set; }
 
@@ -64,20 +73,30 @@ public class DialogueManager : MonoBehaviour
         }
 
     }
+    /// <summary>
+    /// tt: 
+    /// </summary>
+    /// <param name="inkJSON"></param>
 
     public void EnterDialogueMode(TextAsset inkJSON)
     {
         currentStory = new Story(inkJSON.text);
         dialogueIsPlaying = true;
         dialoguePanel.SetActive(true);
+        // add listener
+        dialogueVariables.StartListening(currentStory); 
+
         ContinueStory(); 
     }
+
     /// <summary>
     ///  empty ink json file passed in 
     /// </summary>
     private IEnumerator ExitDialogueMode()
     {
-        yield return new WaitForSeconds(waitFor); 
+        yield return new WaitForSeconds(waitFor);
+        // remove listener
+        dialogueVariables.StopListening(currentStory); 
         dialogueIsPlaying = false;
         dialoguePanel.SetActive(false);
         dialogueText.text = ""; 
@@ -102,6 +121,7 @@ public class DialogueManager : MonoBehaviour
             StartCoroutine(ExitDialogueMode()); 
         }
     }
+
     /// <summary>
     /// tt :   initializes array of cT to be the same as out choices, and for each choice in the arrray we will initialize 
     /// the corresponding text using an index for the choice to ensure matching 
@@ -118,6 +138,9 @@ public class DialogueManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// tt: 
+    /// </summary>
     private void DisplayChoices()
     {
         List<Choice> currentChoices = currentStory.currentChoices; 
@@ -155,6 +178,7 @@ public class DialogueManager : MonoBehaviour
         yield return new WaitForEndOfFrame();
         EventSystem.current.SetSelectedGameObject(choices[0].gameObject); 
     }
+
     /// <summary>
     /// tt: on click function enabling player to make choices 
     /// </summary>
@@ -164,5 +188,16 @@ public class DialogueManager : MonoBehaviour
         currentStory.ChooseChoiceIndex(choiceIndex); 
         // shouldnt need register on submit 
         ContinueStory();
+    }
+
+    public Ink.Runtime.Object GetVariableState(string variableName)
+    {
+        Ink.Runtime.Object variableValue = null; 
+        dialogueVariables.variables.TryGetValue(variableName, out variableValue);
+        if(variableValue == null)
+        {
+            Debug.Log("Ink Variable was found to be null " + variableName); 
+        }
+        return variableValue; 
     }
 }
