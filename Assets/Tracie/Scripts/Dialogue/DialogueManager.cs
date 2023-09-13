@@ -6,7 +6,12 @@ using Ink.Runtime;
 using UnityEngine.EventSystems; 
 using System.Runtime.CompilerServices;
 /// <summary>
-/// tt : a layermask could be used to seperate interactive object prompts and dialogue system 
+/// tt : 
+/// inkJSON files are sent to the Dialogue Manager which then 
+///  creates a story object with ink file  that plays through, 
+/// enables choice and displays the dialogue 
+/// notes : 
+/// a layermask could be used to seperate interactive object prompts and dialogue system 
 /// with this implementation, where is the best place to call the load scene? 
 /// </summary>
 public class DialogueManager : MonoBehaviour
